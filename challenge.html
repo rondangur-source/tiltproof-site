@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You've been challenged — TiltProof</title>
+<meta name="description" content="A friend sent you a poker spot. What's your line? Answer it in TiltProof.">
+<meta property="og:title" content="Can you beat their line? 🂠">
+<meta property="og:description" content="A friend challenged you to a poker spot in TiltProof. Pick your line — the solver settles it.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1e2022">
+<meta name="apple-itunes-app" content="app-id=6786891736">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<style>
+/* Self-contained on purpose: this page must render inside Instagram's
+   in-app browser with ZERO external requests. */
+:root{
+  --ink:#1e2022; --charcoal:#2d2f31; --raised:#3a3d40;
+  --coral:#ff5757; --coral-deep:#e23e3e; --gold:#e8b54a;
+  --text:#f4f4f5; --muted:rgba(255,255,255,.55); --dim:rgba(255,255,255,.38);
+  --hairline:rgba(255,255,255,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
+  background:linear-gradient(180deg,var(--ink) 0%,var(--charcoal) 60%,#2e2829 100%);
+  color:var(--text);
+  min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:28px 18px 44px;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.suits{position:fixed;inset:0;pointer-events:none;z-index:0}
+.suits span{position:absolute;color:rgba(255,255,255,.04);user-select:none}
+.suits .g{color:rgba(232,181,74,.06)}
+main{position:relative;z-index:1;width:100%;max-width:420px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;justify-content:center;gap:8px;font-size:22px;font-weight:800;letter-spacing:-.3px}
+.brand em{font-style:normal;color:var(--coral)}
+.badge{
+  align-self:center;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(232,181,74,.35);border-radius:999px;padding:5px 14px;
+  background:rgba(232,181,74,.08)
+}
+h1{font-size:26px;font-weight:800;text-align:center;letter-spacing:-.4px;line-height:1.2}
+h1 em{font-style:normal;color:var(--coral)}
+.card{
+  background:var(--charcoal);border:1px solid var(--hairline);border-radius:22px;
+  padding:24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;align-items:center;gap:16px
+}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{font-size:12px;font-weight:800;color:#fff;border-radius:999px;padding:5px 12px}
+.chip.pos{background:var(--coral)}
+.chip.spot{background:#50545a}
+.prompt{font-size:15px;color:var(--muted);text-align:center;line-height:1.45;max-width:34ch}
+.row-label{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.cards{display:flex;gap:8px;justify-content:center}
+.pcard{
+  width:52px;height:73px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:800;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.35)
+}
+.cards.hero .pcard{width:64px;height:90px;border-radius:11px}
+.pcard .r{font-size:24px}
+.cards.hero .pcard .r{font-size:30px}
+.pcard .s{font-size:19px;margin-top:2px}
+.cards.hero .pcard .s{font-size:24px;margin-top:3px}
+.pcard.red{color:var(--coral-deep)}
+.pcard.blk{color:var(--charcoal)}
+.stakes{font-size:16px;font-weight:700;color:var(--muted)}
+.stakes b{color:var(--text)}
+.tease{
+  width:100%;border-top:1px solid var(--hairline);padding-top:16px;
+  display:flex;flex-direction:column;align-items:center;gap:6px
+}
+.tease .q{font-size:17px;font-weight:800}
+.tease .locked{font-size:13px;color:var(--dim)}
+.tease .locked b{color:var(--gold)}
+.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.ghost{
+  font-size:14px;font-weight:800;color:var(--dim);border:1.5px dashed rgba(255,255,255,.18);
+  border-radius:12px;padding:10px 18px;background:rgba(255,255,255,.03)
+}
+.store{
+  display:flex;align-items:center;justify-content:center;gap:12px;text-decoration:none;
+  background:var(--coral);color:#fff;border-radius:16px;padding:16px 22px;
+  font-weight:800;font-size:18px;letter-spacing:-.2px;
+  box-shadow:0 14px 40px rgba(255,87,87,.35);
+  transition:transform .15s ease
+}
+.store:active{transform:scale(.97)}
+.store svg{width:26px;height:26px;flex:none}
+.store small{display:block;font-size:11px;font-weight:600;opacity:.85;letter-spacing:.02em}
+.fine{font-size:12px;color:var(--dim);text-align:center;line-height:1.5}
+.fine a{color:var(--muted)}
+footer{position:relative;z-index:1;margin-top:auto;padding-top:32px;font-size:11px;color:rgba(255,255,255,.28);text-align:center;line-height:1.6;max-width:420px}
+</style>
+</head>
+<body>
+
+<div class="suits" aria-hidden="true">
+  <span style="top:8%;left:4%;font-size:110px">&spades;</span>
+  <span class="g" style="top:60%;left:-2%;font-size:80px">&diams;</span>
+  <span style="top:16%;right:5%;font-size:70px">&hearts;</span>
+  <span class="g" style="top:72%;right:6%;font-size:120px">&clubs;</span>
+</div>
+
+<main>
+  <div class="brand">&#127136; Tilt<em>Proof</em></div>
+  <div class="badge" id="badge">Challenge</div>
+  <h1 id="headline">You've been <em>challenged.</em></h1>
+
+  <div class="card" id="spot" hidden>
+    <div class="chips">
+      <span class="chip pos" id="pos">BTN</span>
+      <span class="chip spot">What's your line?</span>
+    </div>
+    <div id="boardWrap" hidden>
+      <div class="row-label" style="text-align:center;margin-bottom:8px">Board</div>
+      <div class="cards" id="board"></div>
+    </div>
+    <div>
+      <div class="row-label" style="text-align:center;margin-bottom:8px">Your hand</div>
+      <div class="cards hero" id="hero"></div>
+    </div>
+    <div class="stakes" id="stakes"></div>
+    <div class="tease">
+      <div class="q">Fold, call, or raise?</div>
+      <div class="actions">
+        <span class="ghost">Fold</span><span class="ghost">Call</span><span class="ghost">Raise</span>
+      </div>
+      <div class="locked" id="lockline">Their answer — and the solver's — <b>unlocks in the app.</b></div>
+    </div>
+  </div>
+
+  <div class="card" id="fallback" hidden>
+    <p class="prompt">This challenge link didn't survive the trip — but the spots are waiting. Real poker decisions, graded by a coach that prices every mistake.</p>
+  </div>
+
+  <a class="store" href="https://apps.apple.com/app/tiltproof-poker-coach/id6786891736">
+    <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8.94-.19 1.84-.86 3.05-.78 1.46.12 2.55.7 3.28 1.74-3.01 1.8-2.29 5.77.73 6.93-.65 1.62-1.5 3.22-3.14 4.28zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+    <span><small>Answer it in the app</small>Get TiltProof free</span>
+  </a>
+  <p class="fine">Already have TiltProof? <a href="#" id="openApp">Open the challenge in the app</a>.</p>
+</main>
+
+<footer>© 2026 TiltProof. Play-money poker training — no real-money gambling, no cash prizes, chips have no monetary value.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // --- base64url → JSON (mirror of ChallengePayload; seed stays a string
+  // here because UInt64 doesn't fit a JS double — the web page only needs
+  // the display fields anyway).
+  function decodePayload(c) {
+    try {
+      var b64 = c.replace(/-/g, "+").replace(/_/g, "/");
+      var rem = b64.length % 4;
+      if (rem === 1) return null;
+      if (rem === 2) b64 += "==";
+      else if (rem === 3) b64 += "=";
+      var json = atob(b64);
+      var p = JSON.parse(json);
+      if (!p || typeof p !== "object") return null;
+      if (typeof p.v !== "number" || p.v < 1) return null;
+      if (typeof p.s !== "string" || !/^\d+$/.test(p.s)) return null;
+      if (typeof p.t !== "number" || p.t < 0) return null;
+      if (["fold", "check", "call", "bet", "raise"].indexOf(p.a) < 0) return null;
+      if (!Array.isArray(p.h) || p.h.length !== 2) return null;
+      if (!Array.isArray(p.b) || p.b.length > 5) return null;
+      if (typeof p.p !== "number" || p.p < 0) return null;
+      if (typeof p.c !== "number" || p.c < 0) return null;
+      if (typeof p.o !== "string") return null;
+      var cardOK = function (s) { return /^[2-9TJQKA][cdhs]$/.test(s); };
+      if (!p.h.every(cardOK) || !p.b.every(cardOK)) return null;
+      return p;
+    } catch (e) { return null; }
+  }
+
+  var SUIT = { c: "♣", d: "♦", h: "♥", s: "♠" };
+  var RED = { d: 1, h: 1 };
+
+  function cardEl(code) {
+    var rank = code[0] === "T" ? "10" : code[0];
+    var suit = code[1];
+    var el = document.createElement("div");
+    el.className = "pcard " + (RED[suit] ? "red" : "blk");
+    el.setAttribute("aria-label", rank + SUIT[suit]);
+    var r = document.createElement("div"); r.className = "r"; r.textContent = rank;
+    var s = document.createElement("div"); s.className = "s"; s.textContent = SUIT[suit];
+    el.appendChild(r); el.appendChild(s);
+    return el;
+  }
+
+  function esc(t) { return String(t).slice(0, 20); } // textContent only — length cap
+
+  var params = new URLSearchParams(location.search);
+  var c = params.get("c");
+  var p = c ? decodePayload(c) : null;
+
+  if (!p) {
+    document.getElementById("fallback").hidden = false;
+    document.getElementById("openApp").parentNode.hidden = true;
+    return;
+  }
+
+  // Sender line + spot.
+  var name = typeof p.n === "string" && p.n.trim() ? esc(p.n.trim()) : null;
+  var h1 = document.getElementById("headline");
+  h1.textContent = "";
+  h1.appendChild(document.createTextNode((name || "A friend") + " challenged "));
+  var em = document.createElement("em"); em.textContent = "you.";
+  h1.appendChild(em);
+  document.getElementById("badge").textContent = "Poker challenge";
+
+  document.getElementById("pos").textContent = esc(p.o);
+  var board = document.getElementById("board");
+  if (p.b.length) {
+    document.getElementById("boardWrap").hidden = false;
+    p.b.forEach(function (code) { board.appendChild(cardEl(code)); });
+  }
+  var hero = document.getElementById("hero");
+  p.h.forEach(function (code) { hero.appendChild(cardEl(code)); });
+
+  var stakes = document.getElementById("stakes");
+  stakes.textContent = "";
+  stakes.appendChild(document.createTextNode("Pot "));
+  var potB = document.createElement("b"); potB.textContent = String(p.p);
+  stakes.appendChild(potB);
+  if (p.c > 0) {
+    stakes.appendChild(document.createTextNode(" · "));
+    var callB = document.createElement("b"); callB.textContent = String(p.c);
+    stakes.appendChild(callB);
+    stakes.appendChild(document.createTextNode(" to call"));
+  } else {
+    stakes.appendChild(document.createTextNode(" · your action"));
+  }
+  var lock = document.getElementById("lockline");
+  lock.textContent = "";
+  lock.appendChild(document.createTextNode((name || "Their") + (name ? "'s" : "") + " answer — and the solver's — "));
+  var lb = document.createElement("b"); lb.textContent = "unlocks in the app.";
+  lock.appendChild(lb);
+
+  document.getElementById("spot").hidden = false;
+
+  // Deep link for people who already have the app (custom scheme; harmless
+  // no-op chooser if the app is missing).
+  document.getElementById("openApp").addEventListener("click", function (e) {
+    e.preventDefault();
+    location.href = "tiltproof://challenge?c=" + encodeURIComponent(c);
+  });
+})();
+</script>
+</body>
+</html>
