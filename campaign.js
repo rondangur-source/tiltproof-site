@@ -13,7 +13,7 @@
   // App Store Connect → Users & Access → (your name) → Provider Token.
   // Apple needs BOTH pt and ct to attribute; with this empty we still tag ct
   // so the links are ready the moment the token is filled in.
-  var PROVIDER_TOKEN = "";
+  var PROVIDER_TOKEN = "128998706";
 
   var c = (new URLSearchParams(location.search).get("c") || "").trim();
   // whitelist: campaign names are our own slugs, never user input
